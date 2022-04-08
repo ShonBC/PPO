@@ -146,4 +146,3 @@ class Agent():
                                  advantage)
 
         self.memory.clear_memory()
-
