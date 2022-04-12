@@ -158,10 +158,39 @@ class Agent():
 
         return T.tensor(advantage).to(self.actor.device)
 
-    def learn_batch(self, batch, states_arr, actions, old_probs, values,
-                    advantage):
+    def learn_batch(self, batch, states_arr, actions_arr, old_probs_arr,
+                    values, advantage):
+
         states = T.tensor(states_arr[batch],
                           dtype=T.float).to(self.actor.device)
+
+        old_probs = T.tensor(old_probs_arr[batch]).to(self.actor.device)
+        actions = T.tensor(actions_arr[batch]).to(self.actor.device)
+
+        dist = self.actor(states)
+        critic_value = self.critic(states)
+
+        critic_value = T.squeeze(critic_value)
+
+        new_probs = dist.log_prob(actions)
+        prob_ratio = new_probs.exp() / old_probs.exp()
+
+        weighted_probs = advantage[batch] * prob_ratio
+        weighted_clipped_probs = T.clamp(prob_ratio, 1 - self.policy_clip,
+                                         1+self.policy_clip) * advantage[batch]
+
+        actor_loss = -T.min(weighted_probs, weighted_clipped_probs).mean()
+
+        returns = advantage[batch] + values[batch]
+        critic_loss = (returns - critic_value)**2
+        critic_loss = critic_loss.mean()
+
+        total_loss = actor_loss + 0.5 * critic_loss
+        self.actor.optimizer.zero_grad()
+        self.critic.optimizer.zero_grad()
+        total_loss.backwards()
+        self.actor.optimizer.step()
+        self.critic.optimizer.step()
 
     def learn(self):
         for _ in range(self.n_epochs):
