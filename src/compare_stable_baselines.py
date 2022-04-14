@@ -1,12 +1,12 @@
 import gym
-from stable_baselines3 import PPO, A2C
+from stable_baselines3 import A2C, PPO, SAC
 import os
 
 env = gym.make('HalfCheetah-v3')
 
 env.reset()
 
-mod = int(input('Select Model: \n 1 - A2C \n 2 - PPO \n'))
+mod = int(input('Select Model: \n 1 - A2C \n 2 - PPO \n 3 - SAC \n'))
 
 log_dir = 'logs'
 
@@ -16,6 +16,9 @@ if mod == 1:
 elif mod == 2:
     model = PPO('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
     model_name = 'PPO'
+elif mod == 3:
+    model = SAC('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
+    model_name = 'SAC'
 
 # Define storage directories
 models_dir = f'models/{model_name}'
