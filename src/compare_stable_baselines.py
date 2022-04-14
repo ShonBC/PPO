@@ -5,7 +5,7 @@ env = gym.make('HalfCheetah-v3')
 
 env.reset()
 
-mod = int(input('Select Model: \n 1 - PPO \n 2 - A2C'))
+mod = int(input('Select Model: \n 1 - PPO \n 2 - A2C \n'))
 
 if mod == 1:
     model = A2C('MlpPolicy', env, verbose=1)
