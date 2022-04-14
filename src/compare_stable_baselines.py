@@ -33,20 +33,10 @@ if not os.path.exists(log_dir):
 # How frequently model is saved
 time_steps = 10000
 
-for i in range(1, 30):
+for i in range(1, 30):  # Can be while True and stop when performance peaks
     model.learn(total_timesteps=time_steps, reset_num_timesteps=False,
                 tb_log_name=model_name)
 
     model.save(f'{models_dir}/{time_steps*i}')
-
-# episodes = 10
-
-# for ep in range(episodes):
-#     obs = env.reset()
-#     done = False
-#     while not done:
-
-#         env.render()
-#         obs, rewards, done, info = env.step(env.action_space.sample())
 
 env.close()
