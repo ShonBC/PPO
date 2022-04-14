@@ -6,18 +6,18 @@ env = gym.make('HalfCheetah-v3')
 
 env.reset()
 
-mod = input('Select Model: \n A2C \n PPO \n SAC \n')
+model_name = input('Select Model: \n A2C \n PPO \n SAC \n')
 epoch = input('Specify the desired epoch to load: ')
 # Define storage directories
-models_dir = f'models/{mod}'
+models_dir = f'models/{model_name}'
 model_path = f'{models_dir}/{epoch}'
 log_dir = 'logs'
 
-if mod == 'A2C':
+if model_name == 'A2C':
     model = A2C.load(model_path, env=env)
-elif mod == 'PPO':
+elif model_name == 'PPO':
     model = PPO.load(model_path, env=env)
-elif mod == 'SAC':
+elif model_name == 'SAC':
     model = SAC.load(model_path, env=env)
 
 episodes = 10

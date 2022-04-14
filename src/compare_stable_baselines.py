@@ -6,23 +6,18 @@ env = gym.make('HalfCheetah-v3')
 
 env.reset()
 
-mod = int(input('Select Model: \n 1 - A2C \n 2 - PPO \n 3 - SAC \n'))
-
-log_dir = 'logs'
-
-if mod == 1:
-    model = A2C('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
-    model_name = 'A2C'
-elif mod == 2:
-    model = PPO('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
-    model_name = 'PPO'
-elif mod == 3:
-    model = SAC('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
-    model_name = 'SAC'
+model_name = input('Select Model: \n A2C \n PPO \n SAC \n')
 
 # Define storage directories
 models_dir = f'models/{model_name}'
+log_dir = 'logs'
 
+if model_name == 'A2C':
+    model = A2C('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
+elif model_name == 'PPO':
+    model = PPO('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
+elif model_name == 'SAC':
+    model = SAC('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
 
 if not os.path.exists(models_dir):
     os.makedirs(models_dir)
