@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ppo import Agent
 
-environment = 'HalfCheetah-v2'#'CartPole-v0'  
+environment = 'HalfCheetah-v3'#'CartPole-v0'  
 env = gym.make(environment)
 
 N = 20
@@ -18,7 +18,8 @@ best_score = env.reward_range[0]
 score_history = []
 figure_file = 'plots/CustomPPO/' + 'games=' + str(n_games) + ',epochs='+ str(n_epochs) + ',alpha='+  str(alpha) + '.png'
 print(figure_file)
-
+print(env.action_space)
+print(env.observation_space.shape)
 
 agent = Agent(n_actions = env.action_space.n, 
               batch_size=batch_size,
