@@ -2,6 +2,8 @@ import gym
 import numpy as np
 import matplotlib.pyplot as plt
 from ppo import Agent
+from torch.utils.tensorboard import SummaryWriter
+
 
 environment = 'HalfCheetah-v3'#'CartPole-v0'  
 env = gym.make(environment)
@@ -21,6 +23,8 @@ figure_file = 'plots/CustomPPO/' + 'games=' + str(n_games) + ',epochs=' + \
 print(figure_file)
 print(env.action_space)
 print(env.observation_space.shape)
+
+writer = SummaryWriter(log_dir='logs/CustomPPO')
 
 agent = Agent(n_actions=env.action_space.shape[0],
               batch_size=batch_size,
@@ -51,6 +55,9 @@ for i in range(n_games):
         observation = observation_
     score_history.append(score)
     avg_score = np.mean(score_history[-100:])
+
+    if i % 1 == 0:
+        writer.add_scalar("rollout/ep_rew_mean", avg_score, i)
     
     if avg_score > best_score:
         best_score = avg_score
@@ -67,4 +74,4 @@ x = [i + 1 for i in range(len(score_history))]
 plt.plot(x, score_history)
 plt.savefig(figure_file)
 plt.show()
-
+writer.flush()
