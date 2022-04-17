@@ -33,7 +33,7 @@ class PPOMemory:
     def store_memory(self, state, action, prob, val, reward, done):
 
         self.states.append(state)
-        self.action.append(action)
+        self.actions.append(action)
         self.probs.append(prob)
         self.vals.append(val)
         self.rewards.append(reward)
@@ -50,8 +50,9 @@ class PPOMemory:
 
 
 class ActorNetwok(nn.Module):
-    def __init__(self, n_actions, input_dims, alpha,
-                 fc1_dims=256, fc2_dims=256, chkpt_dir='tmp/ppo'):
+    def __init__(self, n_actions, input_dims, 
+                 alpha, chkpt_dir,
+                 fc1_dims=256, fc2_dims=256, ):
         super().__init__()
 
         self.checkpoint_file = os.path.join(chkpt_dir, 'actor_torch_ppo')
@@ -120,8 +121,8 @@ class Agent():
         self.n_epochs = n_epochs
         self.gae_lambda = gae_lambda
 
-        self.actor = ActorNetwok(n_actions, input_dims, alpha)
-        self.critic = CriticNetwork(input_dims, alpha, "models/")
+        self.actor = ActorNetwok(n_actions, input_dims, alpha, chkpt_dir="models/CustomPPO/")
+        self.critic = CriticNetwork(input_dims, alpha, "models/CustomPPO/")
         self.memory = PPOMemory(batch_size)
 
     def remember(self, state, action, prob, val, reward, done):
@@ -136,7 +137,7 @@ class Agent():
         self.critic.load_checkpoint()
 
     def choose_aciton(self, observation):
-        state = T.tensor([observation], dtype=T.float).to(self.actor.device)
+        state = T.tensor(np.array(observation), dtype=T.float).to(self.actor.device)
         actor_output = self.actor(state)
         value = self.critic(state)
         action = actor_output.sample()
@@ -188,7 +189,7 @@ class Agent():
         total_loss = actor_loss + 0.5 * critic_loss
         self.actor.optimizer.zero_grad()
         self.critic.optimizer.zero_grad()
-        total_loss.backwards()
+        total_loss.backward()
         self.actor.optimizer.step()
         self.critic.optimizer.step()
 
@@ -197,7 +198,7 @@ class Agent():
             states, actions, old_probs, vals,\
                 rewards, dones, batches = self.memory.generate_batches()
             advantage = self.get_advantage(vals, rewards, dones,)
-            values = T.tensor(values).to(self.actor.device)
+            values = T.tensor(vals).to(self.actor.device)
 
             for batch in batches:
                 self.learn_batch(batch, states, actions, old_probs, values,
