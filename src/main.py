@@ -38,7 +38,7 @@ for i in range(n_games):
     done = False
     score = 0
     while not done:
-        action, prob, val = agent.choose_aciton(observation)
+        action, prob, val = agent.choose_action(observation)
         observation_, reward, done, info = env.step(action)
         n_steps += 1
         score += reward

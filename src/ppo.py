@@ -55,7 +55,7 @@ class ActorNetwok(nn.Module):
                  fc1_dims=256, fc2_dims=256, ):
         super().__init__()
 
-        self.checkpoint_file = os.path.join(chkpt_dir, 'actor_torch_ppo')
+        self.checkpoint_file = os.path.join(chkpt_dir, 'actor_torch_ppo.pth')
         self.actor = nn.Sequential(
             nn.Linear(*input_dims, fc1_dims),
             nn.ReLU(),
@@ -79,7 +79,7 @@ class ActorNetwok(nn.Module):
         T.save(self.state_dict(), self.checkpoint_file)
 
     def load_checkpoint(self):
-        self.load_checkpoint(T.load(self.checkpoint_file))
+        self.load_state_dict(T.load(self.checkpoint_file))
 
 
 class CriticNetwork(nn.Module):
@@ -87,7 +87,7 @@ class CriticNetwork(nn.Module):
     def __init__(self, input_dims, alpha, chkpt_dir_):
         self.chkpt_dir = chkpt_dir_
         super().__init__()
-        self.checkpoint_file = os.path.join(self.chkpt_dir, 'critic_ppo')
+        self.checkpoint_file = os.path.join(self.chkpt_dir, 'critic_ppo.pth')
         # print(*input_dims)
         # print(input_dims)
         self.critic = nn.Sequential(
@@ -136,7 +136,7 @@ class Agent():
         self.actor.load_checkpoint()
         self.critic.load_checkpoint()
 
-    def choose_aciton(self, observation):
+    def choose_action(self, observation):
         state = T.tensor(np.array(observation), dtype=T.float).to(self.actor.device)
         actor_output = self.actor(state)
         value = self.critic(state)
