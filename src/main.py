@@ -16,19 +16,20 @@ avg_score = 0
 n_steps = 0
 best_score = env.reward_range[0]
 score_history = []
-figure_file = 'plots/CustomPPO/' + 'games=' + str(n_games) + ',epochs='+ str(n_epochs) + ',alpha='+  str(alpha) + '.png'
+figure_file = 'plots/CustomPPO/' + 'games=' + str(n_games) + ',epochs=' + \
+            str(n_epochs) + ',alpha=' + str(alpha) + '.png'
 print(figure_file)
 print(env.action_space)
 print(env.observation_space.shape)
 
-agent = Agent(n_actions = env.action_space.n, 
+agent = Agent(n_actions=env.action_space.shape[0],
               batch_size=batch_size,
-              alpha = alpha, 
-              n_epochs=n_epochs, 
+              alpha=alpha,
+              n_epochs=n_epochs,
               input_dims=env.observation_space.shape,
-              gamma = 0.99,
-              gae_lambda = 0.95,
-              policy_clip = 0.2
+              gamma=0.99,
+              gae_lambda=0.95,
+              policy_clip=0.2
               )
 
 
