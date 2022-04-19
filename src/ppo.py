@@ -4,6 +4,7 @@ import torch as T
 import torch.nn as nn
 import torch.optim as optim
 from torch.distributions.categorical import Categorical
+# from torch.utils.tensorboard import SummaryWriter
 
 
 class PPOMemory:
@@ -50,12 +51,12 @@ class PPOMemory:
 
 
 class ActorNetwok(nn.Module):
-    def __init__(self, n_actions, input_dims, 
+    def __init__(self, n_actions, input_dims,
                  alpha, chkpt_dir,
                  fc1_dims=256, fc2_dims=256, ):
         super().__init__()
 
-        self.checkpoint_file = os.path.join(chkpt_dir, 'actor_torch_ppo')
+        self.checkpoint_file = os.path.join(chkpt_dir, 'actor_torch_ppo.pth')
         self.actor = nn.Sequential(
             nn.Linear(*input_dims, fc1_dims),
             nn.ReLU(),
@@ -79,7 +80,7 @@ class ActorNetwok(nn.Module):
         T.save(self.state_dict(), self.checkpoint_file)
 
     def load_checkpoint(self):
-        self.load_checkpoint(T.load(self.checkpoint_file))
+        self.load_state_dict(T.load(self.checkpoint_file))
 
 
 class CriticNetwork(nn.Module):
@@ -87,11 +88,11 @@ class CriticNetwork(nn.Module):
     def __init__(self, input_dims, alpha, chkpt_dir_):
         self.chkpt_dir = chkpt_dir_
         super().__init__()
-        self.checkpoint_file = os.path.join(self.chkpt_dir, 'critic_ppo')
+        self.checkpoint_file = os.path.join(self.chkpt_dir, 'critic_ppo.pth')
         # print(*input_dims)
         # print(input_dims)
         self.critic = nn.Sequential(
-            nn.Linear(*input_dims, 256),  # Not sure why there is an asterisk here!
+            nn.Linear(*input_dims, 256),
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),
@@ -115,15 +116,17 @@ class CriticNetwork(nn.Module):
 class Agent():
 
     def __init__(self, n_actions, input_dims, gamma, alpha, gae_lambda,
-                 policy_clip, batch_size, n_epochs):
+                 policy_clip, batch_size, n_epochs, chkpt_dir):
         self.gamma = gamma
         self.policy_clip = policy_clip
         self.n_epochs = n_epochs
         self.gae_lambda = gae_lambda
 
-        self.actor = ActorNetwok(n_actions, input_dims, alpha, chkpt_dir="models/CustomPPO/")
+        self.actor = ActorNetwok(n_actions, input_dims, alpha,
+                                 chkpt_dir="models/CustomPPO/")
         self.critic = CriticNetwork(input_dims, alpha, "models/CustomPPO/")
         self.memory = PPOMemory(batch_size)
+        # self.writer = SummaryWriter(log_dir='logs/CustomPPO')
 
     def remember(self, state, action, prob, val, reward, done):
         self.memory.store_memory(state, action, prob, val, reward, done)
@@ -136,8 +139,9 @@ class Agent():
         self.actor.load_checkpoint()
         self.critic.load_checkpoint()
 
-    def choose_aciton(self, observation):
-        state = T.tensor(np.array(observation), dtype=T.float).to(self.actor.device)
+    def choose_action(self, observation):
+        state = T.tensor(np.array(observation),
+                         dtype=T.float).to(self.actor.device)
         actor_output = self.actor(state)
         value = self.critic(state)
         action = actor_output.sample()
@@ -194,7 +198,7 @@ class Agent():
         self.critic.optimizer.step()
 
     def learn(self):
-        for _ in range(self.n_epochs):
+        for i in range(self.n_epochs):
             states, actions, old_probs, vals,\
                 rewards, dones, batches = self.memory.generate_batches()
             advantage = self.get_advantage(vals, rewards, dones,)
@@ -203,5 +207,6 @@ class Agent():
             for batch in batches:
                 self.learn_batch(batch, states, actions, old_probs, values,
                                  advantage)
-
+            avg_score = np.mean(rewards)
+            # self.writer.add_scalar("rollout/ep_rew_mean", avg_score, i)
         self.memory.clear_memory()
