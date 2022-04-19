@@ -24,9 +24,10 @@ elif model_name == 'SAC':
     model = SAC.load(model_path, env=env)
     print(model)
 elif model_name == 'CustomPPO':
-    batch_size = 5
+    batch_size = 64
     alpha = 0.0003
-    n_epochs = 4
+    n_epochs = 10
+    chkpt_dir = "models/CustomPPO/"
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     model = Agent(n_actions=env.action_space.shape[0],
                   batch_size=batch_size,
@@ -35,7 +36,8 @@ elif model_name == 'CustomPPO':
                   input_dims=env.observation_space.shape,
                   gamma=0.99,
                   gae_lambda=0.95,
-                  policy_clip=0.2
+                  policy_clip=0.2,
+                  chkpt_dir="models/CustomPPO/"
                   )
     model.load_models()
 
