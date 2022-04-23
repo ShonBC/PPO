@@ -4,7 +4,7 @@ import torch as T
 import torch.nn as nn
 import torch.optim as optim
 from torch.distributions.categorical import Categorical
-# from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
 
 class PPOMemory:
@@ -126,7 +126,7 @@ class Agent():
                                  chkpt_dir="models/CustomPPO/")
         self.critic = CriticNetwork(input_dims, alpha, "models/CustomPPO/")
         self.memory = PPOMemory(batch_size)
-        # self.writer = SummaryWriter(log_dir='logs/CustomPPO')
+        self.writer = SummaryWriter(log_dir='logs/CustomPPO')
 
     def remember(self, state, action, prob, val, reward, done):
         self.memory.store_memory(state, action, prob, val, reward, done)
@@ -196,7 +196,8 @@ class Agent():
         total_loss.backward()
         self.actor.optimizer.step()
         self.critic.optimizer.step()
-
+        return prob_ratio, actor_loss, returns, critic_loss, total_loss
+        
     def learn(self):
         for i in range(self.n_epochs):
             states, actions, old_probs, vals,\
@@ -205,8 +206,8 @@ class Agent():
             values = T.tensor(vals).to(self.actor.device)
 
             for batch in batches:
-                self.learn_batch(batch, states, actions, old_probs, values,
+                prob_ratio, actor_loss, returns, critic_loss, total_loss = self.learn_batch(batch, states, actions, old_probs, values,
                                  advantage)
             avg_score = np.mean(rewards)
-            # self.writer.add_scalar("rollout/ep_rew_mean", avg_score, i)
+            self.writer.add_scalar("my_metric", prob_ratio)
         self.memory.clear_memory()
