@@ -206,8 +206,12 @@ class Agent():
             values = T.tensor(vals).to(self.actor.device)
 
             for batch in batches:
-                prob_ratio, actor_loss, returns, critic_loss, total_loss = self.learn_batch(batch, states, actions, old_probs, values,
-                                 advantage)
+                prob_ratio, actor_loss, returns, critic_loss, total_loss = self.learn_batch(batch, states, actions, old_probs, values, advantage)
+
+            self.writer.add_scalar("train/clip_fraction", prob_ratio.mean())
+            self.writer.add_scalar("train/loss", total_loss)
+            self.writer.add_scalar("train/actor_loss", actor_loss)
+            self.writer.add_scalar("train/critic_loss", critic_loss)
             avg_score = np.mean(rewards)
-            self.writer.add_scalar("my_metric", prob_ratio)
+            
         self.memory.clear_memory()
