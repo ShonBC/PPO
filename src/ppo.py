@@ -198,7 +198,7 @@ class Agent():
         self.critic.optimizer.step()
         return prob_ratio, actor_loss, returns, critic_loss, total_loss
         
-    def learn(self):
+    def learn(self, n_steps):
         for i in range(self.n_epochs):
             states, actions, old_probs, vals,\
                 rewards, dones, batches = self.memory.generate_batches()
@@ -208,10 +208,9 @@ class Agent():
             for batch in batches:
                 prob_ratio, actor_loss, returns, critic_loss, total_loss = self.learn_batch(batch, states, actions, old_probs, values, advantage)
 
-            self.writer.add_scalar("train/clip_fraction", prob_ratio.mean())
-            self.writer.add_scalar("train/loss", total_loss)
-            self.writer.add_scalar("train/actor_loss", actor_loss)
-            self.writer.add_scalar("train/critic_loss", critic_loss)
-            avg_score = np.mean(rewards)
-            
+        self.writer.add_scalar("train/clip_fraction", prob_ratio.mean(), n_steps)
+        self.writer.add_scalar("train/loss", total_loss, n_steps)
+        self.writer.add_scalar("train/actor_loss", actor_loss, n_steps)
+        self.writer.add_scalar("train/critic_loss", critic_loss, n_steps)
+
         self.memory.clear_memory()
