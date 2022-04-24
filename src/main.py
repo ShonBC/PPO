@@ -12,7 +12,7 @@ time_steps = 10000
 batch_size = 64
 n_epochs = 10
 alpha = 0.0003
-n_games = 10#300
+n_games = 300
 learn_iters = 0
 avg_score = 0
 n_steps = 0
@@ -60,7 +60,7 @@ for i in range(n_games):
         agent.remember(observation, action, prob, val, reward, done)
 
         if n_steps % time_steps == 0 or n_steps == 1000:
-            agent.learn()
+            agent.learn(n_steps)
             learn_iters += 1
 
         observation = observation_
