@@ -60,7 +60,7 @@ for i in range(n_games):
         agent.remember(observation, action, prob, val, reward, done)
 
         if n_steps % time_steps == 0 or n_steps == 1000:
-            agent.learn()
+            agent.learn(n_steps)
             learn_iters += 1
 
         observation = observation_
