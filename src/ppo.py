@@ -197,7 +197,7 @@ class Agent():
         self.actor.optimizer.step()
         self.critic.optimizer.step()
         return prob_ratio, actor_loss, returns, critic_loss, total_loss
-        
+
     def learn(self, n_steps):
         for i in range(self.n_epochs):
             states, actions, old_probs, vals,\
